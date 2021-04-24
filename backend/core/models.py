@@ -1,21 +1,28 @@
 from django.db import models
 import uuid
 
+
 class TipoCartao(models.Model):
     tipo = models.CharField(max_length=500)
     valor = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"{self.tipo} (R$ {self.valor})"
+
 
 class Cartao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     numero = models.CharField(max_length=500)
     tipo = models.ForeignKey(TipoCartao, on_delete=models.CASCADE, related_name='cartoes')
 
+
 class Trecho(models.Model):
     nome = models.CharField(max_length=500)
 
+
 class Ponto(models.Model):
     class Meta:
-        ordering = ['id',]
+        ordering = ['id', ]
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
     trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='pontos', null=True, blank=True)
@@ -26,7 +33,7 @@ class Ponto(models.Model):
     bairro = models.TextField(default='')
 
     def __str__(self):
-        return "%s (%.4f, %.4f)"%(self.codigo, self.lat, self.lon)
+        return "%s (%.4f, %.4f)" % (self.codigo, self.lat, self.lon)
 
 
 class Empresa(models.Model):
@@ -41,15 +48,18 @@ class Empresa(models.Model):
     def __str__(self):
         return self.nome_oficial
 
+
 class PontoPorEmpresa(models.Model):
     class Meta:
-        ordering = ['id',]
+        ordering = ['id', ]
     ponto = models.ForeignKey(Ponto, on_delete=models.CASCADE, related_name='pontos_por_empresa', null=True, blank=True)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     codigo_cittamobi = models.CharField(max_length=500)
-    
+
     def __str__(self):
         return str(self.ponto)
+
+
 class Linha(models.Model):
     numero = models.CharField(max_length=500)
     nome = models.CharField(max_length=500)
@@ -61,6 +71,7 @@ class Linha(models.Model):
     def __str__(self):
         return self.nome
 
+
 class OrdemPontosLinha(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='ordens_trechos')
     ponto = models.ForeignKey(Ponto, on_delete=models.CASCADE, related_name='ordens_linhas')
@@ -68,11 +79,13 @@ class OrdemPontosLinha(models.Model):
     atendimento = models.CharField(max_length=500, null=True, blank=True)
     sentido = models.CharField(max_length=500, null=True, blank=True)
 
+
 class Carro(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     ultimo_carro = models.ForeignKey('self', related_name='carro_futuro', on_delete=models.CASCADE, null=True)
     numero = models.CharField(max_length=500)
     placa = models.CharField(max_length=500)
+
 
 class Partida(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='partidas')
@@ -84,6 +97,7 @@ class Partida(models.Model):
     sentido = models.CharField(max_length=500, null=True, blank=True)
     real = models.BooleanField(default=True)
 
+
 class ViagemDePassageiro(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='viagens_de_passageiros', null=True, blank=True)
     cartao = models.ForeignKey(Cartao, on_delete=models.CASCADE, related_name='viagens_de_passageiros')
@@ -91,10 +105,12 @@ class ViagemDePassageiro(models.Model):
     ponto_desembarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='desembarques', null=True, blank=True)
     partida_embarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='embarque_de_passageiros', null=True, blank=True)
     partida_desembarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='desembarque_de_passageiros', null=True, blank=True)
-    horario = models.DateTimeField(auto_now_add=False)
+    horario = models.DateTimeField(auto_now_add=False) # Embarque
+    horario_desembarque = models.DateTimeField(auto_now_add=False, null=True)
     integracao = models.BooleanField(default=False)
     valor = models.FloatField(default=0.0)
     calculou_ponto_desembarque = models.BooleanField(default=False)
+
 
 class LinhaPorDiaSemana(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='por_dia_semana')
@@ -104,6 +120,7 @@ class LinhaPorDiaSemana(models.Model):
     quantidade_total = models.FloatField()
     quantidade_equivalente = models.FloatField()
 
+
 class EmbarqueDeLinhaPorTempo(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='por_tempo')
     sentido = models.CharField(max_length=500, null=True, blank=True)
@@ -112,11 +129,12 @@ class EmbarqueDeLinhaPorTempo(models.Model):
     quantidade_total = models.FloatField()
     quantidade_equivalente = models.FloatField()
 
+
 class EmbarquePorTrecho(models.Model):
     linha = models.ForeignKey(Linha, on_delete=models.CASCADE, related_name='por_trecho')
-    #trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='viagens')
+    # trecho = models.ForeignKey(Trecho, on_delete=models.CASCADE, related_name='viagens')
     ponto = models.ForeignKey(Ponto, on_delete=models.CASCADE, related_name='viagens', null=True, blank=True)
-    #sentido = models.CharField(max_length=500, null=True, blank=True)
+    # sentido = models.CharField(max_length=500, null=True, blank=True)
     partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='por_trecho', null=True, blank=True)
     faixa_horaria = models.CharField(max_length=500, null=True, blank=True)
     tempo_partida = models.TimeField()
@@ -124,4 +142,3 @@ class EmbarquePorTrecho(models.Model):
     quantidade_total_desembarque = models.FloatField()
     quantidade_no_veiculo_pos_ponto = models.FloatField(default=0)
     ordem_ponto = models.IntegerField(default=0)
-
