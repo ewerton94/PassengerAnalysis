@@ -9,7 +9,7 @@ class EmpresaSerializer(serializers.ModelSerializer):
     #logo = serializers.FileField(use_url=True)
     class Meta:
         model = Empresa
-        fields = ["id", "nome"] 
+        fields = ["id", "nome_oficial"] 
 
 class LinhaSerializer(serializers.ModelSerializer):
     #empresa = EmpresaSerializer(many=False, read_only=True)

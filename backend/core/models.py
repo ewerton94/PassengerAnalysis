@@ -14,11 +14,15 @@ class Cartao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     numero = models.CharField(max_length=500)
     tipo = models.ForeignKey(TipoCartao, on_delete=models.CASCADE, related_name='cartoes')
-
+    
+    def __str__(self):
+        return f"{self.numero} (Tipo: {self.tipo})"
 
 class Trecho(models.Model):
     nome = models.CharField(max_length=500)
-
+    
+    def __str__(self):
+        return self.nome
 
 class Ponto(models.Model):
     class Meta:
@@ -64,7 +68,7 @@ class Linha(models.Model):
     numero = models.CharField(max_length=500)
     nome = models.CharField(max_length=500)
     eixo = models.CharField(max_length=500, default='')
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True, blank=True)
     km_ida = models.FloatField(default=0)
     km_volta = models.FloatField(default=0)
 
@@ -85,6 +89,9 @@ class Carro(models.Model):
     ultimo_carro = models.ForeignKey('self', related_name='carro_futuro', on_delete=models.CASCADE, null=True)
     numero = models.CharField(max_length=500)
     placa = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.numero
 
 
 class Partida(models.Model):
