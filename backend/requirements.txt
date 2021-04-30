@@ -1,5 +1,5 @@
 django==2.2
-psycopg2==2.8.4
+psycopg2-binary==2.8.4
 djangorestframework==3.10.3
 requests
 django-bulk-update
