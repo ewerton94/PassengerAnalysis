@@ -17,7 +17,7 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
+from conf.permissions import CustomPermission
 
 '''
 As classes desse arquivo realizam um query (queryset = Model.objects.all()) dos Models e retornar essa requisição para o usuário
@@ -29,7 +29,7 @@ class EmpresaViewSet(viewsets.ModelViewSet):
     
     queryset = Empresa.objects.all()
     serializer_class = EmpresaSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [CustomPermission]
 
     http_method_names = ['get', 'post', 'options', 'head', 'put', 'update', 'delete']
     
@@ -40,7 +40,7 @@ class EmpresaViewSet(viewsets.ModelViewSet):
         Obs.: PK = Id a empresa
         '''
             
-        linhas = Linha.objects.all().filter(empresa=pk)
+        linhas = Linha.objects.filter(escopo=request.user.usuario.escopo).filter(empresa=pk)
         linhas = LinhaSerializer(linhas, many=True)
         
         return Response(linhas.data)
@@ -50,9 +50,16 @@ class LinhaViewSet(viewsets.ModelViewSet):
     
     queryset = Linha.objects.all()
     serializer_class = LinhaSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [CustomPermission]
 
     http_method_names = ['get', 'post', 'options', 'head', 'put', 'update', 'delete']
+
+    def get_queryset(self):
+        try:
+            return Linha.objects.filter(escopo=self.request.user.usuario.escopo)
+        except Exception as e:
+            print(str(e))
+            return Linha.objects.filter(escopo__isnull=True)
 
     @action(detail=False,  methods=['post',])
     def atualizar_info_linha(self, request, pk=None):
@@ -152,10 +159,5 @@ class LinhaViewSet(viewsets.ModelViewSet):
             detail['linha'] = linha.nome
             detail['lote'] = linha.empresa.lote
             detail['empresa'] = linha.empresa.nome_oficial
-            
-        #print(detail)
-
         
         return Response(detail)
-
-    

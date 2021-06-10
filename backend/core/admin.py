@@ -10,6 +10,7 @@ admin.site.register(Trecho)
 admin.site.register(Partida)
 admin.site.register(Ponto)
 admin.site.register(PontoPorEmpresa)
+admin.site.register(Usuario)
 #admin.site.register(PontoPorEmpresa)
 #admin.site.register(TipoCartao)
 

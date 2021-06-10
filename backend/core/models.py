@@ -1,5 +1,16 @@
 from django.db import models
+from django.contrib.auth.models import User
 import uuid
+
+from escopos.models import Escopo
+
+
+class Usuario(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='usuario', null=True, blank=True)
+    nome = models.CharField(max_length=500, null=True, blank=True)
+    escopo = models.ForeignKey(Escopo, on_delete=models.CASCADE, related_name='usuarios', null=True, blank=True)
+
 
 
 class TipoCartao(models.Model):
@@ -23,6 +34,7 @@ class Trecho(models.Model):
     
     def __str__(self):
         return self.nome
+
 
 class Ponto(models.Model):
     class Meta:
@@ -49,6 +61,8 @@ class Empresa(models.Model):
     ativa = models.BooleanField(default=True)
     valor_km = models.FloatField(default=0)
 
+    escopo = models.ForeignKey(Escopo, on_delete=models.CASCADE, related_name='empresas', null=True, blank=True)
+
     def __str__(self):
         return self.nome_oficial
 
@@ -71,6 +85,8 @@ class Linha(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True, blank=True)
     km_ida = models.FloatField(default=0)
     km_volta = models.FloatField(default=0)
+
+    escopo = models.ForeignKey(Escopo, on_delete=models.CASCADE, related_name='linhas', null=True, blank=True)
 
     def __str__(self):
         return self.nome
@@ -112,7 +128,7 @@ class ViagemDePassageiro(models.Model):
     ponto_desembarque = models.ForeignKey(PontoPorEmpresa, on_delete=models.CASCADE, related_name='desembarques', null=True, blank=True)
     partida_embarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='embarque_de_passageiros', null=True, blank=True)
     partida_desembarque = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='desembarque_de_passageiros', null=True, blank=True)
-    horario = models.DateTimeField(auto_now_add=False) # Embarque
+    horario = models.DateTimeField(auto_now_add=False)  # Embarque
     horario_desembarque = models.DateTimeField(auto_now_add=False, null=True)
     integracao = models.BooleanField(default=False)
     valor = models.FloatField(default=0.0)

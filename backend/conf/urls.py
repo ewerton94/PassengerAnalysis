@@ -1,10 +1,10 @@
 from django.contrib import admin
-from django.urls import path
 from django.urls import path, include
 from rest_framework_swagger.views import get_swagger_view
 from core.routes import router as core_routes
 from django.conf import settings
 from django.conf.urls.static import static
+from . import auth_views
 
 schema_view = get_swagger_view(title='API Passageiros')
 
@@ -12,7 +12,9 @@ urlpatterns = [
     path('', schema_view),
     path('admin/', admin.site.urls),
     path('core/', include(core_routes.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('entrar/', auth_views.login_view),
+    path('sair/', auth_views.logout_view),
 ]
 
 

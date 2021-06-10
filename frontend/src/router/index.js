@@ -9,7 +9,14 @@ import VueGoogleCharts from 'vue-google-charts'
 
 import VueApexCharts from 'vue-apexcharts'
 Vue.use(VueApexCharts)
+import { settings } from '../config/constants'
 
+// const apiLink = settings.apiLink
+const version = settings.version
+// const appName = settings.appName
+const compile = settings.compile
+
+const keyToken = 'user_' + version + compile
 var GoogleMapsKey = process.env.GoogleMapsKey.replaceAll('"', '').replaceAll("'", '')
 
 Vue.use(VueGoogleCharts, {
@@ -52,6 +59,37 @@ export default function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     mode: process.env.VUE_ROUTER_MODE,
     base: process.env.VUE_ROUTER_BASE
+  })
+
+  Router.beforeEach((to, from, next) => {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      if (localStorage.getItem(keyToken + '-token') === null) {
+        next({
+          path: '/login',
+          params: { nextUrl: to.fullPath }
+        })
+      } else {
+        const user = JSON.parse(localStorage.getItem(keyToken))
+        console.log(user)
+        if (to.matched.some(record => record.meta.is_admin)) {
+          if (user.is_admin === 1) {
+            next()
+          } else {
+            next({ name: 'home' })
+          }
+        } else {
+          next()
+        }
+      }
+    } else if (to.matched.some(record => record.meta.guest)) {
+      if (localStorage.getItem(keyToken + '-token') === null) {
+        next()
+      } else {
+        next({ name: 'home' })
+      }
+    } else {
+      next()
+    }
   })
 
   return Router
