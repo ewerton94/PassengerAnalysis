@@ -1,9 +1,9 @@
 [build]
   base    = "frontend"
-  publish = "dist/"
-  command = "node ./scripts/create-env.js && quasar build"
-
+  publish = "dist/spa"
+  command = "node ./scripts/create-env.js && npm run build"
 
 [[redirects]]
-  from = "/"
-  to = "spa/"
+  from = "/*"
+  to = "/index.html"
+  status = 200

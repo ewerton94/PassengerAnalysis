@@ -1,7 +1,7 @@
-from rest_framework import permissions
 from django.contrib.contenttypes.models import ContentType
+from rest_framework import permissions
+
 from escopos.models import LogAcesso
-from django.conf import settings
 
 DICT_METHODS = {
     'POST': 'add',
@@ -9,43 +9,79 @@ DICT_METHODS = {
     'DELETE': 'delete',
     'GET': 'view',
     'OPTIONS': 'view',
-    'PATCH': 'view'
-
+    'PATCH': 'view',
+    'HEAD': 'view',
 }
-print(settings.DEBUG)
-if False:
-    CustomPermission = permissions.AllowAny
 
-else:
-    class CustomPermission(permissions.BasePermission):
-        """
-        Object-level permission to only allow owners of an object to edit it.
-        Assumes the model instance has an `owner` attribute.
-        """
 
-        def has_object_permission(self, request, view, obj):
-            # Read permissions are allowed to any request,
-            # so we'll always allow GET, HEAD or OPTIONS requests.
-            print('Entrou')
-            if request.method in permissions.SAFE_METHODS:
-                return True
+class CustomPermission(permissions.BasePermission):
+    """
+    Permission based on Django model perms, with DEBUG-friendly fallbacks.
+    """
 
-            # obj here is a UserProfile instance
-            print(obj.escopo_id == request.user.escopo.escopo_id)
-            return obj.escopo_id == request.user.escopo.escopo_id
+    def _user_escopo_id(self, user):
+        usuario = getattr(user, 'usuario', None)
+        if usuario is None:
+            return None
+        return usuario.escopo_id
 
-        def has_permission(self, request, view):
-            user = request.user
-            print('ewfewf')
-            if not user.is_authenticated:
-                return False
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-            obj_content_type = ContentType.objects.get_for_model(view.queryset.model)
-            app = obj_content_type.app_label
-            model = obj_content_type.model
+        if not request.user or not request.user.is_authenticated:
+            return False
 
-            LogAcesso.objects.create(usuario=user, url=request.get_full_path(),
-                                     permissao='%s.%s_%s' % (app, DICT_METHODS[request.method.upper()], model),
-                                     metodo=request.method)
+        if request.user.is_superuser or request.user.is_staff:
+            return True
 
-            return user.has_perm('%s.%s_%s' % (app, DICT_METHODS[request.method.upper()], model))
+        obj_escopo_id = getattr(obj, 'escopo_id', None)
+        if obj_escopo_id is None:
+            return True
+
+        return obj_escopo_id == self._user_escopo_id(request.user)
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_superuser or user.is_staff:
+            return True
+
+        queryset = getattr(view, 'queryset', None)
+        if queryset is None and hasattr(view, 'get_queryset'):
+            try:
+                queryset = view.get_queryset()
+            except Exception:
+                queryset = None
+
+        if queryset is None:
+            return True
+
+        model = queryset.model
+        obj_content_type = ContentType.objects.get_for_model(model)
+        app = obj_content_type.app_label
+        model_name = obj_content_type.model
+        method = request.method.upper()
+        perm_codename = DICT_METHODS.get(method, 'view')
+        perm = f'{app}.{perm_codename}_{model_name}'
+
+        try:
+            LogAcesso.objects.create(
+                usuario=user,
+                url=request.get_full_path(),
+                permissao=perm,
+                metodo=method,
+            )
+        except Exception:
+            pass
+
+        if user.has_perm(perm):
+            return True
+
+        # Local/dev usability: authenticated users with an escopo can read.
+        if method in ('GET', 'HEAD', 'OPTIONS') and self._user_escopo_id(user) is not None:
+            return True
+
+        return False

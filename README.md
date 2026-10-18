@@ -1,47 +1,58 @@
 # Análises de dados de passageiros
+
 ![Dashboard](print.png "Dashboard")
-Este é um projeto criado como Trabalho de Conclusão de Curso de Engenharia Civil da Universidade Federal de Alagoas.
-Esta é a estrutura do projeto:
+
+Trabalho de Conclusão de Curso de Engenharia Civil da Universidade Federal de Alagoas.
+
+**Resumo do projeto (com prints e link do TCC):** [portfolio/RESUMO-PROJETO.md](portfolio/RESUMO-PROJETO.md)
+
+## Estrutura
 
 ```
   ├── ArquivosEntrada
-  │   |── RC (Report Center)
-  │   |── TPP (Tempo Por Ponto)
-      └── TV (Tempo de Viagem)
   ├── Resultados
-  │   |── PassageirosPorPonto
-  ├── Scripts para Baixar dados
-  |── SistemaWeb (backend)
-  └── SistemaWeb (frontend)
-```   
+  ├── ScriptsIniciais
+  ├── backend          # Django 5.2 + DRF
+  └── frontend         # Vue 3 + Quasar 2
+```
 
+## Rodar a aplicação web localmente
 
-## Arquivos de entrada:
+Pré-requisitos: **Python 3.12**, **Node.js ≥ 20**, **PostgreSQL**.
 
-[Sistema GoolSystem](https://gool.cittati.com.br/Login.aspx?ReturnUrl=%2f). É necessário fazer download dos arquivos do GoolSystem (Relatórios de Tempo de Viagem e Tempo por Ponto) em `xls (Excel)`.
-[Sistema ReportCenter](http://mrc.maceio.prodatamobility.com.br/). É necessário fazer download dos arquivos de Utilização Detalhada por veículo em `csv`.
+### Backend
 
-## Scripts Iniciais
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r backend\requirements.txt
+copy backend\conf\secret.example.py backend\conf\secret.py
+# edite secret.py com a senha do Postgres e crie o DB passenger_analysis
+cd backend
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
 
-Para Obter os dados de GPS e Bilhetagem eletrônica é necessário rodar o arquivo `main.py`, em seguida o arquivo `open_mrc_detail.py` e, finalmente o arquivo `consolidate_mrc_detail.py`.
+Detalhes: [backend/README.md](backend/README.md).
 
-Para obter o embarque estimado de passageiros, utilizando a data como chave de junção, é necessário rodar o arquivo `find_local_pass.py`.
+### Frontend
 
-## Backend
+```powershell
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
+```
 
-O Backend foi desenvolvido em Python e utiliza, principalmente, as bibliotecas Django, Pandas e Scikit-learn. Para mais detalhes acesse a [página específica do backend](backend)
+Detalhes: [frontend/README.md](frontend/README.md).
 
-## Frontend
+## Arquivos de entrada / scripts
 
-O Frontend foi desenvolvido em JavaScript e utiliza, principalmente, os frameworks Vue e Quasar. Para mais detalhes acesse a [página específica do frontend](frontend)
+[Sistema GoolSystem](https://gool.cittati.com.br/Login.aspx?ReturnUrl=%2f) e [ReportCenter](http://mrc.maceio.prodatamobility.com.br/) fornecem os dados brutos.
 
+Os scripts em `ScriptsIniciais/` (`main.py`, `open_mrc_detail.py`, `consolidate_mrc_detail.py`, `find_local_pass.py`) cuidam da ingestão offline e são independentes do stack web atualizado.
 
 ## Contribuindo
 
-Por favor, verifique se a mudança já não está em desenvolvimento em issues e, caso seja feita alguma mudança, a solicitação deve ocorrer via pull request.
-
-
-
-
-
-
+Verifique issues abertas e envie mudanças via pull request.

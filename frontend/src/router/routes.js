@@ -1,11 +1,10 @@
-
 const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'dashboard', component: () => import('pages/Dashboard.vue') },
-      { path: '', component: () => import('pages/Inicio.vue') }
+      { path: '', component: () => import('pages/Inicio.vue') },
+      { path: 'dashboard', component: () => import('pages/Dashboard.vue') }
     ],
     meta: {
       requiresAuth: true
@@ -19,11 +18,8 @@ const routes = [
     },
     name: 'login'
   },
-
-  // Always leave this as last one,
-  // but you can also remove it
   {
-    path: '*',
+    path: '/:catchAll(.*)*',
     component: () => import('pages/Error404.vue')
   }
 ]

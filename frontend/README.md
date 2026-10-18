@@ -1,26 +1,38 @@
 # Frontend - Análise de dados de passageiros
 
-Projeto TCC
+SPA **Vue 3 + Quasar 2 (Vite) + Pinia**.
 
-## Install the dependencies
+Requer **Node.js ≥ 20**.
+
+## Install
+
 ```bash
+cd frontend
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+Copie `.env.example` para `.env` e, se for usar mapa de calor, preencha `GoogleMapsKey`.
+
+## Dev
+
 ```bash
-quasar dev
+npm run dev
 ```
 
-### Lint the files
+Abre em `http://localhost:8080/`. A API esperada é `http://localhost:8000/` (veja `src/config/constants.js`).
+
+Use o usuário criado com `createsuperuser` no backend.
+
+## Build
+
+```bash
+npm run build
+```
+
+Saída em `dist/spa/`.
+
+## Lint
+
 ```bash
 npm run lint
 ```
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).

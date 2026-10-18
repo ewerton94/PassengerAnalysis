@@ -10,3 +10,11 @@ Lixeira/*
 *secret.py
 *secret.js
 *.env
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+frontend/dist/
+frontend/.quasar/
+backend/static-root/
+backend/media/

@@ -1,65 +1,49 @@
 ## Backend - Análises de dados de passageiros
 
-Este backend serve para armazenar os dados de estudo em um banco de dados, gerenciado pela ORM do Django e disponibilizá-los ao frontend por meio de uma API desenvolvida pela biblioteca Django Rest Framework.
+API Django REST Framework com PostgreSQL. Stack alvo: **Python 3.12** + **Django 5.2 LTS**.
 
-### Testando Localmente
+### Testando localmente
 
-
-Lembre-se de verificar se o terminal está na pasta `backend` para que seja possível realizar as operações seguintes.
-
-```system
-$ cd backend
+```powershell
+cd backend
 ```
 
-#### para rodar pela primeira vez:
+#### Primeira vez
 
-1. Instale o Python;
-2. Instale as dependências:
+1. Crie um venv com Python 3.12 na raiz do repositório (se ainda não existir):
 
-```system
-$ pip install -r requirements.txt
+```powershell
+cd ..
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r backend\requirements.txt
+cd backend
 ```
 
-3. Instale o PostgreSQL;
+2. Instale/configure o PostgreSQL e crie o banco `passenger_analysis`.
 
-4. Crie um banco de dados no PostegreSQL;
+3. Copie `conf/secret.example.py` para `conf/secret.py` e ajuste `SECRET_KEY`, usuário e senha do Postgres.
 
-5. Crie um arquivo `conf/secret.py` com as seguintes informações:
+4. Aplique migrations:
 
-```python
-SECRET_KEY = 'Sua_chave_secreta'
-DEBUG = True
-ALLOWED_HOSTS = []
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '<NOME DO BANCO>', # Nome do banco que você criou no PostgreSQL no passo acima.
-        'USER': '<SEU USUÁRIO>', # Seu usuário Postgres
-        'PASSWORD': 'SENHA', # Sua senha Postgres
-        'HOST': 'localhost', 
-        'PORT': '5432',
-    }
-}
+```powershell
+python manage.py migrate
 ```
 
-6. Atualize o banco de dados:
+5. Crie um superusuário:
 
-```system
-$ python manage.py migrate
+```powershell
+python manage.py createsuperuser
 ```
 
-7. Crie um usuário admin:
+6. No admin (`http://127.0.0.1:8000/admin/`), crie um **Escopo** e um **Usuario** (`core.Usuario`) associado ao seu user Django.
 
-```system
-$ python manage.py createsuperuser
+#### Rodar o servidor
+
+```powershell
+python manage.py runserver
 ```
-7. Crie um objeto funcionário no admin e associar ao seu usuário;
 
-
-
-#### Para rodar o servidor local (É necessário toda vez que for testar a aplicação)
-
-```system
-$ python manage.py runserver
-```
+- API / Swagger UI: `http://127.0.0.1:8000/`
+- OpenAPI schema: `http://127.0.0.1:8000/schema/`
+- Login: `POST /entrar/` com `{ "username", "password" }` → retorna `token` DRF

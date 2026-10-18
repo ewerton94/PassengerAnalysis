@@ -101,7 +101,7 @@ def create_json_ppp(files, df_base, df_row=None, df_first_work=None):
         N = len(files)
         df_final = {}
         print(N)
-        #gmaps = googlemaps.Client(key='AIzaSyALMrzfk81yAHOGscwBgZpeTfsOKgxsAxg ')
+        # gmaps = googlemaps.Client(key='YOUR_GOOGLE_MAPS_API_KEY')
         final = []
         if df_row is None:
             for ii, file_handle in enumerate(files):

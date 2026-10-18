@@ -11,12 +11,16 @@
         name="nome"
         color="green"
         type="checkbox"
-      >
-
-      </q-option-group>
-
+      />
     </transition>
-    <q-btn label="Enviar" v-show="!visible" flat  class="bg-primary text-white" align="right"  @click="enviarLinhas"/>
+    <q-btn
+      label="Enviar"
+      v-show="!visible"
+      flat
+      class="bg-primary text-white"
+      align="right"
+      @click="enviarLinhas"
+    />
     <q-inner-loading :showing="visible">
       <q-spinner-oval size="50px" color="primary" />
     </q-inner-loading>
@@ -24,9 +28,11 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapMutations } from 'vuex'
+import { mapState, mapActions } from 'pinia'
+import { useCoreStore } from 'stores/core'
+
 export default {
-  data: function () {
+  data () {
     return {
       linhasEscolhidas: [],
       visible: true
@@ -36,11 +42,10 @@ export default {
     this.start()
   },
   computed: {
-    ...mapState('Core', ['linhas'])
+    ...mapState(useCoreStore, ['linhas'])
   },
   methods: {
-    ...mapActions('Core', ['listarLinhas']),
-    ...mapMutations('Core', ['CLEAN_EXTRA_FILTRO']),
+    ...mapActions(useCoreStore, ['listarLinhas', 'CLEAN_EXTRA_FILTRO']),
     async start () {
       await this.listarLinhas()
       this.CLEAN_EXTRA_FILTRO()
@@ -48,12 +53,9 @@ export default {
     },
     enviarLinhas () {
       this.visible = true
-      var linhas = this.linhasEscolhidas.join(',')
+      const linhas = this.linhasEscolhidas.join(',')
       this.$router.push(`/dashboard/?linhas=${linhas}`)
     }
   }
 }
 </script>
-
-<style>
-</style>
